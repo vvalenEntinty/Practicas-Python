@@ -1,0 +1,100 @@
+import csv
+from ej02_funciones import cant_total_registros
+
+LAT_MIN = -56
+LAT_MAX = 13
+LON_MIN = -81
+LON_MAX = -34
+
+def campo_vacio(linea, campo):
+    return linea[campo].strip() == ""
+
+def validar_latitud(linea, campo):
+    if campo_vacio(linea, campo):
+        return False
+    try:
+        latitud = float(linea[campo])
+    except ValueError:
+        return False
+    return  -90 <= latitud <= 90
+
+def validar_longitud(linea, campo):
+    if campo_vacio(linea, campo):
+        return False
+    try:
+        longitud = float(linea[campo])
+    except ValueError:
+        return False
+    return  -180 <= longitud <= 180
+
+def coordenadas_incorrectas(ruta, encoding, separador, nombreLatitud, nombreLongitud):
+    with open(ruta, encoding=encoding) as archivo:
+        csv_reader = csv.DictReader(archivo, delimiter=separador)
+        registros = [row for row in csv_reader if not (validar_latitud(row, nombreLatitud) and validar_longitud(row, nombreLongitud))]
+        return len(registros), registros 
+
+
+def solo_existe_longitud(linea, nombreLatitud, nombreLongitud):
+    return campo_vacio(linea, nombreLatitud) and not campo_vacio(linea, nombreLongitud) 
+
+def solo_existe_latitud(linea, nombreLatitud, nombreLongitud):
+    return campo_vacio(linea, nombreLongitud) and not campo_vacio(linea, nombreLatitud)
+
+def solo_latitud_o_longitud(linea, nombreLatitud, nombreLongitud):
+    return solo_existe_latitud(linea, nombreLatitud, nombreLongitud) ^ solo_existe_longitud(linea, nombreLatitud, nombreLongitud)
+
+
+
+
+def resumen_dataset (ruta, encoding, separador):
+    total_registros = 0
+    registros_coordenadas_incorrectas = 0
+    fechas_incorrectas = 0
+    registros_duplicados = 0
+    registros_incompletos = 0
+    resumen = {
+        "total_registros": cant_total_registros(ruta, separador),
+        "registros_coordenadas_incorrectas": coordenadas_incorrectas(ruta, encoding, separador, "Latitud", "Longitud")[0],
+        "fechas_incorrectas": fechas_incorrectas, # Falta implementar la función para validar fechas
+        "registros_duplicados": registros_duplicados, # Funcion tomas
+        "registros_incompletos": registros_incompletos # Falta implementar la función para detectar registros incompletos
+    }
+    # with open (ruta,encoding=encoding) as archivo:
+    #    csv_reader = csv.DictReader(archivo , delimiter=separador)
+    #    for row in csv_reader: 
+    return resumen
+
+
+def validar_cotas_coordenadas(latitud, longitud):
+    try:
+        lat = float(latitud)
+        lon = float(longitud)
+    except:
+        return False
+
+    return LAT_MIN <= lat <= LAT_MAX and LON_MIN <= lon <= LON_MAX
+
+def cotas_coordenadas(ruta,encoding,separador):
+    with open(ruta, encoding=encoding) as archivo:
+        csv_reader = csv.DictReader(archivo , delimiter=separador)
+        cotas_invalidas = {}
+        for i, row in enumerate(csv_reader,start=2):
+            longitud = (row.get("decimalLongitude") or row.get("longitudeDecimal") or "").strip()
+            latitud = (row.get("decimalLatitude") or row.get("latitudeDecimal") or "").strip()
+            if not validar_cotas_coordenadas(latitud,longitud):
+                cotas_invalidas[i] = row
+    return cotas_invalidas              
+# Duda - No se si tenemos que usar un parametro nombreLongitud/nombreLatitud 
+#        o extraerlo del archivo
+
+def validar_latitud_longitud (ruta,encoding,separador,nombreLatitud,nombreLongitud):
+    longitud_validaciones = {}
+    latitud_validaciones = {}
+
+    with open(ruta , encoding=encoding) as archivo:
+        csv_reader = csv.DictReader (archivo, delimiter=separador)
+
+        for i, row in enumerate(csv_reader,start=2):
+            if not validar_latitud(row,nombreLatitud):
+
+    return latitud_validadas, longitud_validadas
